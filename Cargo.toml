@@ -1,0 +1,11 @@
+[package]
+name = "yit"
+version = "0.1.0"
+authors = ["Yoana Zelova <y_zelova@outlook.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+rust-crypto = "0.2.36"
+miniz_oxide = "0.4.3"
