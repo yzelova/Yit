@@ -4,6 +4,8 @@ use std::io;
 use std::io::prelude::*;
 use std::path::Path;
 mod index;
+mod tree;
+mod commit; 
 
 #[derive(std::clone::Clone)]
 pub struct Repository {
@@ -15,6 +17,7 @@ pub enum RepoError {
     IOError,
     RollbackError,
     IndexParsingError,
+    CommitError,
 }
 
 fn rollback(path: String) -> io::Result<()> {
@@ -23,11 +26,11 @@ fn rollback(path: String) -> io::Result<()> {
 
 impl Repository {
     pub fn new(path: String) -> Self {
-        Repository { path: path.clone() }
+        Repository { path: path.clone()}
     }
 
-    pub fn init(mut self) -> Result<(), RepoError> {
-        let mut path = self.path + "\\.yit";
+    pub fn init(self) -> Result<(), RepoError> {
+        let path = self.path + "\\.yit";
         if Path::new(&path).exists() {
             return Err(RepoError::RepoAlreadyExists);
         }
@@ -89,8 +92,34 @@ impl Repository {
     }
 
     pub fn add(self, file_path: String) -> Result<(), RepoError> {
-        let res = File::create(self.path.clone() + "\\.yit\\index");
         let index_file_path = self.path.clone() + "\\.yit\\index";
+        let full_file_path = self.path.clone() + "\\" + &file_path.clone();
+        let res = index::Index::new(index_file_path.clone());
+        match res {
+            Err(_) => Err(RepoError::IndexParsingError),
+            Ok(index_obj) => {
+                if index_obj.clone().tracks_file(file_path.clone()) {
+                    if index_obj.clone().has_different_hash(file_path.clone()) {
+                        let res = index_obj.clone().add_obj(file_path, full_file_path, index_file_path);
+                        if res.is_err() {
+                            return Err(RepoError::IndexParsingError);
+                        }
+                    }
+                } else {
+                    let res = index_obj.clone().add_obj(file_path, full_file_path, index_file_path);
+                    if res.is_err() {
+                        return Err(RepoError::IndexParsingError);
+                    }
+                }
+                Ok(())
+            }
+        }
+    }
+
+    pub fn commit(self, message: String, parents: Vec<String>) -> Result<(), RepoError>  {
+        let res = File::open(self.path.clone() + "\\.yit\\index");
+        let index_file_path = self.path.clone() + "\\.yit\\index";
+        
         match res {
             Err(_) => Err(RepoError::IOError),
             Ok(_) => {
@@ -98,21 +127,21 @@ impl Repository {
                 match res {
                     Err(_) => Err(RepoError::IndexParsingError),
                     Ok(index_obj) => {
-                        if index_obj.clone().tracks_file(file_path.clone()) {
-                            if index_obj.clone().has_different_hash(file_path.clone()) {
-                                index_obj.clone().update_hash(file_path);
-                            } else {
-                            }
-                        } else {
-                            let res = index_obj.clone().add_obj(file_path, index_file_path);
-                            if res.is_err() {
-                                return Err(RepoError::IndexParsingError);
+                        let tr = tree::Tree::new(index_obj.index_map);
+                        let (hash, file_content) = tr.hash_tree();
+                        tree::Tree::write_tree(hash.clone(), file_content);
+                        let res = commit::write_commit(message, parents, hash);
+                        match res {
+                            Err(_) => Err(RepoError::CommitError),
+                            Ok(hash) => {
+                                println!("{}", hash);
+                                return Ok(());
                             }
                         }
-                        Ok(())
                     }
                 }
             }
         }
     }
+    
 }

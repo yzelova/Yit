@@ -15,7 +15,10 @@ pub enum IndexError {
 
 impl Index {
     pub fn new(file_path: String) -> Result<Self, IndexError> {
-        let res = File::open(file_path.clone());
+        let mut res = File::open(file_path.clone());
+        if res.is_err() {
+            res = File::create(file_path.clone());
+        }
         match res {
             Err(_) => Err(IndexError::IOError),
             Ok(mut file) => {
@@ -29,7 +32,6 @@ impl Index {
                 while words.peek().is_some() {
                     let chunk: Vec<&str> = words.by_ref().take(2).collect();
                     index_map.insert(String::from(chunk[0]), String::from(chunk[1]));
-                    println!("{}", index_map[chunk[0]]);
                 }
                 Ok(Index {
                     index_map,
@@ -54,19 +56,8 @@ impl Index {
         }
     }
 
-    pub fn update_hash(mut self, path: String) {
-        let blob = blob::Blob::new(path.clone());
-        let res = blob.hash_object(true);
-        match res {
-            Err(_) => (),
-            Ok(hash) => {
-                self.index_map.entry(path).or_insert(hash);
-            }
-        }
-    }
-
-    pub fn add_obj(mut self, path: String, index_path: String) -> Result<(), IndexError> {
-        let blob = blob::Blob::new(path.clone());
+    pub fn add_obj(mut self, path: String, full_path: String, index_path: String) -> Result<(), IndexError> {
+        let blob = blob::Blob::new(full_path.clone());
         let res = blob.hash_object(true);
         match res {
             Err(_) => Err(IndexError::IOError),
@@ -74,14 +65,16 @@ impl Index {
                 self.index_map.insert(path.clone(), hash);
                 let res = File::create(index_path);
                 match res {
-                    Err(_) => Err(IndexError::IOError),
+                    Err(_) => {
+                        Err(IndexError::IOError)
+                    },
                     Ok(mut file) => {
                         let res = file.set_len(0);
                         match res {
                             Err(_) => Err(IndexError::IOError),
                             Ok(_) => {
                                 for (key, val) in self.index_map {
-                                    let line = key + " " + &val;
+                                    let line = key + " " + &val + "\n";
                                     let res = file.write_all(line.as_bytes());
                                     if res.is_err() {
                                         return Err(IndexError::IOError);

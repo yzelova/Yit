@@ -39,6 +39,8 @@ pub enum HashError {
     IOError,
 }
 
+
+#[derive(Clone)]
 pub struct Blob {
     pub file_path: String,
 }
@@ -53,7 +55,9 @@ impl Blob {
     pub fn hash_object(self, write: bool) -> Result<String, HashError> {
         let open_file_res = File::open(self.file_path.clone());
         match open_file_res {
-            Err(_) => Err(HashError::IOError),
+            Err(_) => {
+                Err(HashError::IOError)
+            },
             Ok(mut file) => {
                 let mut contents = String::new();
                 let read_res = file.read_to_string(&mut contents);
