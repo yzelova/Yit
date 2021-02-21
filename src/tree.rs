@@ -88,20 +88,7 @@ impl Tree {
             }
         }
     }
-
-    pub fn print(self) {
-        println!("tree: {}", self.name);
-        print!("blobs: ");
-        for blob in self.blobs {
-            print!("{} ", blob.file_path);
-        }
-        println!();
-        println!("subtrees: ");
-        for tree in self.subtrees {
-            tree.print();
-        }
-    }
-
+    
     pub fn tree_to_index_map(hash: String) -> HashMap<String, String> {
         let file_content_res = file::cat_file(hash);
         let mut index_map: HashMap<String, String> = HashMap::new();

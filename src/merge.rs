@@ -33,7 +33,6 @@ pub fn three_fold(
             tree.add_blob(key.clone(), key);
         }
     }
-
     for (key, _) in branch_index_map.clone() {
         if into_branch_index_map.clone().contains_key(&key) {
             let new_file_content = merge_blobs(

@@ -150,7 +150,6 @@ impl Repository {
                                 }
                                 index_map.extend(index_obj.index_map);
                                 let tr = tree::Tree::new(index_map);
-                                tr.clone().print();
                                 let hash = tr.hash_tree();
                                 match Repository::get_current_head_last_commit() {
                                     Err(_) => Err(RepoError::CommitError),
@@ -332,7 +331,7 @@ impl Repository {
                                                 Err(_) => Err(RepoError::CommitError),
                                                 Ok(hash) => {
                                                     let file_res = File::create(
-                                                        String::from("\\refs\\heads\\")
+                                                        String::from(".yit\\refs\\heads\\")
                                                             + &into_branch,
                                                     );
                                                     match file_res {
@@ -342,11 +341,6 @@ impl Repository {
                                                                 String::from("ref\n") + &hash;
                                                             let res =
                                                                 file.write_all(content.as_bytes());
-                                                            if res.is_err() {
-                                                                return Err(RepoError::IOError);
-                                                            }
-                                                            let res =
-                                                                fs::remove_file(".yit\\index");
                                                             if res.is_err() {
                                                                 return Err(RepoError::IOError);
                                                             }

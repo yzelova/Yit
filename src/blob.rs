@@ -11,10 +11,6 @@ pub enum RepositoryError {
     RepoDoesNotExist,
 }
 
-// pub enum BlobError {
-//     IOError,
-// }
-
 pub fn write_object(hash: String, content: String) -> Result<(), RepositoryError> {
     if !Path::new(".yit").exists() {
         return Err(RepositoryError::RepoDoesNotExist);
@@ -88,16 +84,4 @@ impl Blob {
             }
         }
     }
-
-    // pub fn read_object(path: String) -> Result<String, BlobError> {
-    //     let file_res = File::open(path);
-    //     match file_res {
-    //         Err(_) => Err(BlobError::IOError),
-    //         Ok(mut file) => {
-    //             let mut content: String = String::from("");
-    //             file.read_to_string(&mut content);
-    //             Ok(content)
-    //         }
-    //     }
-    // }
 }
