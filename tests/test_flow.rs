@@ -1,8 +1,8 @@
+use yit::repo;
+use std::{fs, env};
+
 #[test]
 fn test_flow() {
-    use crate::repo;
-    use std::{fs, env};
-
     // Reset "tmp" directory:
     let _ = fs::remove_dir_all("tmp");
     fs::create_dir("tmp").unwrap();
