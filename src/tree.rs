@@ -26,10 +26,10 @@ impl Tree {
         if str.clone().is_empty() {
             return None;
         }
-        if !rest.is_empty() && rest.chars().nth(0).unwrap() == '\\' {
+        if !rest.is_empty() && rest.chars().nth(0).unwrap() == '/' {
             rest = rest[1..].to_string();
         }
-        while !rest.is_empty() && rest.chars().nth(0).unwrap() != '\\' {
+        while !rest.is_empty() && rest.chars().nth(0).unwrap() != '/' {
             word = (word.to_owned() + &rest.chars().nth(0).unwrap().to_string()).to_string();
             rest = rest[1..].to_string();
         }
@@ -116,7 +116,7 @@ impl Tree {
         let mut tree = Tree {
             subtrees: Vec::new(),
             blobs: Vec::new(),
-            name: String::from("\\"),
+            name: String::from("/"),
         };
         for (key, _) in index_map {
             tree.add_blob(key.clone(), key);
@@ -163,11 +163,11 @@ impl Tree {
         let new_content = String::from("tree\n") + &content;
         let dir = &hash[0..2];
         let filename = &hash[2..];
-        let res = fs::create_dir_all(String::from(".yit\\objects\\") + dir);
+        let res = fs::create_dir_all(String::from(".yit/objects/") + dir);
         if res.is_err() {
             return Err(TreeError::IOError);
         }
-        match File::create(String::from(".yit\\objects\\") + dir + "\\" + filename) {
+        match File::create(String::from(".yit/objects/") + dir + "/" + filename) {
             Err(_) => Err(TreeError::IOError),
             Ok(mut file) => {
                 let compressed = compress_to_vec(new_content.as_bytes(), 0);

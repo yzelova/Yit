@@ -37,11 +37,11 @@ pub fn write_commit(
 
     let dir = &hash[0..2];
     let filename = &hash[2..];
-    let res = fs::create_dir_all(String::from(".yit\\objects\\") + dir);
+    let res = fs::create_dir_all(String::from(".yit/objects/") + dir);
     if res.is_err() {
         return Err(CommitError::IOError);
     }
-    match File::create(String::from(".yit\\objects\\") + dir + "\\" + filename) {
+    match File::create(String::from(".yit/objects/") + dir + "/" + filename) {
         Err(_) => Err(CommitError::IOError),
         Ok(mut file) => {
             let compressed = compress_to_vec(content.as_bytes(), 0);
