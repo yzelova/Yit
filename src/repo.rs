@@ -46,7 +46,7 @@ impl Repository {
             }
             return Err(RepoError::IOError);
         }
-        res = fs::create_dir(path.clone() + "\\objects");
+        res = fs::create_dir(path.clone() + "/objects");
         if res.is_err() {
             res = rollback(path);
             if res.is_err() {
@@ -54,7 +54,7 @@ impl Repository {
             }
             return Err(RepoError::IOError);
         }
-        res = fs::create_dir(path.clone() + "\\refs");
+        res = fs::create_dir(path.clone() + "/refs");
         if res.is_err() {
             res = rollback(path);
             if res.is_err() {
@@ -62,7 +62,7 @@ impl Repository {
             }
             return Err(RepoError::IOError);
         }
-        res = fs::create_dir(path.clone() + "\\refs\\heads");
+        res = fs::create_dir(path.clone() + "/refs/heads");
         if res.is_err() {
             res = rollback(path);
             if res.is_err() {
@@ -70,7 +70,7 @@ impl Repository {
             }
             return Err(RepoError::IOError);
         }
-        res = fs::create_dir(path.clone() + "\\refs\\tags");
+        res = fs::create_dir(path.clone() + "/refs/tags");
         if res.is_err() {
             res = rollback(path);
             if res.is_err() {
@@ -78,11 +78,11 @@ impl Repository {
             }
             return Err(RepoError::IOError);
         }
-        let file_res = File::create(path.clone() + "\\HEAD");
+        let file_res = File::create(path.clone() + "/HEAD");
         match file_res {
             Err(_) => Err(RepoError::IOError),
             Ok(mut file) => {
-                res = file.write_all(b".yit\\refs\\heads\\master");
+                res = file.write_all(b".yit/refs/heads/master");
                 if res.is_err() {
                     res = rollback(path);
                     if res.is_err() {
@@ -96,7 +96,7 @@ impl Repository {
     }
 
     pub fn add(self, file_path: String) -> Result<(), RepoError> {
-        let index_file_path = String::from(".yit\\index");
+        let index_file_path = String::from(".yit/index");
         let full_file_path = file_path.clone();
         match index::Index::new(index_file_path.clone()) {
             Err(_) => Err(RepoError::IndexParsingError),
@@ -126,15 +126,15 @@ impl Repository {
 
     pub fn commit(self, message: String) -> Result<(), RepoError> {
         let res;
-        if !Path::new(".yit\\index").exists() {
-            res = File::create(".yit\\index");
+        if !Path::new(".yit/index").exists() {
+            res = File::create(".yit/index");
         } else {
-            res = File::open(".yit\\index");
+            res = File::open(".yit/index");
         }
         match Repository::get_current_head_last_commit() {
             Err(_) => return Err(RepoError::CommitError),
             Ok(last_commit) => {
-                let index_file_path = String::from(".yit\\index");
+                let index_file_path = String::from(".yit/index");
                 match res {
                     Err(_) => Err(RepoError::IOError),
                     Ok(_) => match index::Index::new(index_file_path.clone()) {
@@ -167,7 +167,7 @@ impl Repository {
                                                     match file.write_all(content.as_bytes()) {
                                                         Err(_) => Err(RepoError::CommitError),
                                                         Ok(_) => {
-                                                            match fs::remove_file(".yit\\index") {
+                                                            match fs::remove_file(".yit/index") {
                                                                 Err(_) => {
                                                                     Err(RepoError::CommitError)
                                                                 }
@@ -206,7 +206,7 @@ impl Repository {
     }
 
     fn get_current_head() -> Result<String, RepoError> {
-        match File::open(String::from(".yit\\HEAD")) {
+        match File::open(String::from(".yit/HEAD")) {
             Err(_) => Err(RepoError::IOError),
             Ok(mut head_file) => {
                 let mut contents = String::new();
@@ -219,7 +219,7 @@ impl Repository {
     }
 
     fn get_current_head_last_commit() -> Result<String, RepoError> {
-        match File::open(String::from(".yit\\HEAD")) {
+        match File::open(String::from(".yit/HEAD")) {
             Err(_) => Err(RepoError::IOError),
             Ok(mut head_file) => {
                 let mut contents = String::new();
@@ -244,25 +244,25 @@ impl Repository {
     }
 
     pub fn checkout(self, branch_name: String) -> Result<(), RepoError> {
-        if !Path::new(&(String::from(".yit\\refs\\heads\\") + &branch_name)).exists() {
+        if !Path::new(&(String::from(".yit/refs/heads/") + &branch_name)).exists() {
             let res = Repository::change_head_last_commit(
-                String::from(".yit\\refs\\heads\\") + &branch_name,
+                String::from(".yit/refs/heads/") + &branch_name,
             );
             if res.is_err() {
                 return Err(RepoError::CheckoutError);
             }
         }
-        let head_file_res = File::create(String::from(".yit\\HEAD"));
+        let head_file_res = File::create(String::from(".yit/HEAD"));
         match head_file_res {
             Err(_) => Err(RepoError::IOError),
             Ok(mut head_file) => {
                 let res = head_file
-                    .write_all((String::from(".yit\\refs\\heads\\") + &branch_name).as_bytes());
+                    .write_all((String::from(".yit/refs/heads/") + &branch_name).as_bytes());
                 if res.is_err() {
                     return Err(RepoError::IOError);
                 }
-                if Path::new(".yit\\index").exists() {
-                    let res = std::fs::remove_file(".yit\\index");
+                if Path::new(".yit/index").exists() {
+                    let res = std::fs::remove_file(".yit/index");
                     if res.is_err() {
                         return Err(RepoError::IOError);
                     }
@@ -331,7 +331,7 @@ impl Repository {
                                                 Err(_) => Err(RepoError::CommitError),
                                                 Ok(hash) => {
                                                     let file_res = File::create(
-                                                        String::from(".yit\\refs\\heads\\")
+                                                        String::from(".yit/refs/heads/")
                                                             + &into_branch,
                                                     );
                                                     match file_res {

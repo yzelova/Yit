@@ -11,10 +11,10 @@ pub enum ParseError {
 pub fn cat_file(hash: String) -> Result<String, ParseError> {
     let dir = &hash[0..2];
     let filename = &hash[2..];
-    match File::open(String::from(".yit\\objects\\") + dir + "\\" + filename) {
+    match File::open(String::from(".yit/objects/") + dir + "/" + filename) {
         Err(_) => Err(ParseError::IOError),
         Ok(mut file) => {
-            let metadata = fs::metadata(&(String::from(".yit\\objects\\") + dir + "\\" + filename))
+            let metadata = fs::metadata(&(String::from(".yit/objects/") + dir + "/" + filename))
                 .expect("unable to read metadata");
             let mut buffer = vec![0; metadata.len() as usize];
             match file.read(&mut buffer) {

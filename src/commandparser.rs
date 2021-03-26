@@ -1,9 +1,12 @@
 use crate::repo;
-use std::io;
+use std::io::{self, Write};
 
 pub fn read_command() {
     let repo = repo::Repository::new();
     loop {
+        print!("> ");
+        io::stdout().flush().unwrap();
+
         let mut input = String::new();
         match io::stdin().read_line(&mut input) {
             Err(e) => println!("{}", e),
@@ -17,7 +20,7 @@ pub fn read_command() {
                     }
                 } else if command == "add" {
                     if words.len() < 2 {
-                        println!("Too few arguments!");
+                        println!("Too few arguments! Try: add <file>");
                     } else {
                         match repo.clone().add(String::from(words[1])) {
                             Err(_) => println!("Error adding file."),
@@ -26,7 +29,7 @@ pub fn read_command() {
                     }
                 } else if command == "commit" {
                     if words.len() < 2 {
-                        println!("Too few arguments!");
+                        println!("Too few arguments! Try: commit <message>");
                     } else {
                         match repo.clone().commit(String::from(words[1])) {
                             Err(_) => println!("Error commiting."),
@@ -35,7 +38,7 @@ pub fn read_command() {
                     }
                 } else if command == "checkout" {
                     if words.len() < 2 {
-                        println!("Too few arguments!");
+                        println!("Too few arguments! Try: checkout <branch-name>");
                     } else {
                         match repo.clone().checkout(String::from(words[1])) {
                             Err(_) => println!("Error in checkout."),
@@ -44,7 +47,7 @@ pub fn read_command() {
                     }
                 } else if command == "merge" {
                     if words.len() < 3 {
-                        println!("Too few arguments!");
+                        println!("Too few arguments! Try: merge <branch> <into-branch>");
                     } else {
                         match repo
                             .clone()
@@ -56,7 +59,7 @@ pub fn read_command() {
                     }
                 } else if command == "diff" {
                     if words.len() < 3 {
-                        println!("Too few arguments!");
+                        println!("Too few arguments! Try: diff <branch1> <branch2>");
                     } else {
                         match repo
                             .clone()
@@ -68,6 +71,16 @@ pub fn read_command() {
                     }
                 } else if command == "quit" {
                     break;
+                } else if command == "help" {
+                    println!("Available commands:");
+                    println!("  init                            Initialize a new repo");
+                    println!("  add      <file>                 Add a new file to be committed");
+                    println!("  commit   <message>              Commit the added files");
+                    println!("  checkout <branch-name>          Check out the given branch");
+                    println!("  merge    <branch> <into-branch> Merge the first branch into the second one");
+                    println!("  diff     <branch1> <branch2>    Diff the two branches");
+                } else {
+                    println!("Unknown command. Try `help` to get a list of valid commands");
                 }
             }
         }
