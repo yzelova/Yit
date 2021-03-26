@@ -17,11 +17,11 @@ pub fn write_object(hash: String, content: String) -> Result<(), RepositoryError
     }
     let dir = &hash[0..2];
     let filename = &hash[2..];
-    let res = fs::create_dir_all(String::from(".yit\\objects\\") + dir);
+    let res = fs::create_dir_all(String::from(".yit/objects/") + dir);
     if res.is_err() {
         return Err(RepositoryError::IOError);
     }
-    match File::create(String::from(".yit\\objects\\") + dir + "\\" + filename) {
+    match File::create(String::from(".yit/objects/") + dir + "/" + filename) {
         Err(_) => Err(RepositoryError::IOError),
         Ok(mut file) => {
             let new_content = String::from("blob\n") + &content;
